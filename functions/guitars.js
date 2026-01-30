@@ -1,5 +1,5 @@
 const { v4: uuidv4 } = require('uuid');
-let guitars = require('../guitarData.js');
+const guitars = require('../guitarData.js');
 
 exports.handler = async (event) => {
     const { httpMethod, body } = event;
@@ -22,29 +22,29 @@ exports.handler = async (event) => {
             body: JSON.stringify(newGuitar)
         };
     }
+    if (httpMethod === 'DELETE') {
+        const requestBody = JSON.parse(body);
+        const { id } = requestBody;
 
-    if (event.httpMethod === "DELETE") {
-        const { id } = event.queryStringParameters || {};
-
-        const index = guitars.findIndex((guitar) => guitar.id === id);
-
-        if (index === -1) {
+        if (!id) {
             return {
-                statusCode: 404,
-                body: JSON.stringify({ message: "Guitar not found", id })
+                statusCode: 400,
+                body: JSON.stringify({ error: 'ID parameter is missing in the request body' })
             };
         }
 
-        guitars.splice(index, 1);
-                
-
-        return {
-            statusCode: 200,
-            body: JSON.stringify({
-            message: "Guitar deleted",
-            id: id
-            })
-        };
+        const index = guitars.findIndex(guitar => guitar.id === id);
+        if (index !== -1) {
+            guitars.splice(index, 1);
+            return {
+                statusCode: 204
+            };
+        } else {
+            return {
+                statusCode: 404,
+                body: JSON.stringify({ error: 'Guitar not found' })
+            };
+        }
     }
 
     // Handle unsupported methods
