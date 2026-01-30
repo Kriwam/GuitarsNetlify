@@ -23,6 +23,20 @@ exports.handler = async (event) => {
         };
     }
 
+    if (event.httpMethod === "DELETE") {
+        const { id } = event.queryStringParameters;
+
+        guitars = guitars.filter((guitar) => guitar.id !== id);
+
+        return {
+            statusCode: 200,
+            body: JSON.stringify({
+            message: "Guitar deleted",
+            id: id
+            })
+        };
+    }
+
     // Handle unsupported methods
     return {
         statusCode: 405,
