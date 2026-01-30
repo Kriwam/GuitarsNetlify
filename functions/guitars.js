@@ -1,5 +1,5 @@
 const { v4: uuidv4 } = require('uuid');
-const guitars = require('../guitarData.js');
+let guitars = require('../guitarData.js');
 
 exports.handler = async (event) => {
     const { httpMethod, body } = event;
@@ -24,9 +24,19 @@ exports.handler = async (event) => {
     }
 
     if (event.httpMethod === "DELETE") {
-        const { id } = event.queryStringParameters;
+        const { id } = event.queryStringParameters || {};
 
-        guitars = guitars.filter((guitar) => guitar.id !== id);
+        const index = guitars.findIndex((guitar) => guitar.id === id);
+
+        if (index === -1) {
+            return {
+                statusCode: 404,
+                body: JSON.stringify({ message: "Guitar not found", id })
+            };
+        }
+
+        guitars.splice(index, 1);
+                
 
         return {
             statusCode: 200,
